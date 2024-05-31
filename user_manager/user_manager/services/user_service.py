@@ -1,7 +1,9 @@
+import json
 from django.db import transaction
+import requests
 from ..models import Customer, Application, ApplicationStatus, BasicInformation
 from django.utils import timezone
-from ..modules.crypto_module import CryptoModule
+from ..settings import VARS
 
 @transaction.atomic
 def create_customer_application_service(document_type, document_number):
@@ -51,7 +53,7 @@ def get_latest_application_service(document_type, document_number, phone_number)
         # Retrieve the BasicInformation associated with the latest application
         basic_info = BasicInformation.objects.get(ApplicationID=latest_application)
         
-        crypto = CryptoModule()
+        crypto = CryptoService()
 
         # Decrypt and verify the phone number
         encrypted_data_hmac = basic_info.MobileNumber
@@ -100,7 +102,7 @@ def bind_phone_service(document_type, document_number, application_id, phone_num
         return "Access denied. Updates can only be made to the most recent application."
 
     # Initialize the cryptography module
-    crypto = CryptoModule()
+    crypto = CryptoService()
 
     # Encrypt the mobile number with HMAC
     data_to_encrypt = phone_number.encode('utf-8')
@@ -147,7 +149,7 @@ def update_application_basic_info_service(document_type, document_number, applic
         return "Access denied. Updates can only be made to the most recent application."
 
     # Initialize the cryptography module
-    crypto = CryptoModule()
+    crypto = CryptoService()
 
     # Encrypt and store each field individually with HMAC
     fields = [first_name, last_name, country, state, city, address, email]
@@ -196,7 +198,7 @@ def get_basic_information_by_application_service(document_type, document_number,
 
         # Retrieve the BasicInformation associated with the given Application ID
         basic_info = BasicInformation.objects.get(ApplicationID__id=application_id)
-        crypto = CryptoModule()
+        crypto = CryptoService()
 
         # Decrypt and verify each encrypted field
         fields = ['FirstName', 'LastName', 'Country', 'State', 'City', 'Address', 'MobileNumber', 'Email']
@@ -221,3 +223,38 @@ def get_basic_information_by_application_service(document_type, document_number,
     except BasicInformation.DoesNotExist:
         # Return an error dictionary if no BasicInformation is found for the given Application ID
         return {"error": "BasicInformation not found for the provided Application ID"}
+
+
+class CryptoService:
+    def __init__(self):
+        self.crypto_manager_ip = VARS["PRIVATE_IP_CRYPTO_MANAGER"]
+        self.encrypt_url = f"http://{self.crypto_manager_ip}/encrypt"
+        self.decrypt_url = f"http://{self.crypto_manager_ip}/decrypt"
+        self.hmac_url = f"http://{self.crypto_manager_ip}/hmac"
+
+    def encrypt_data(self, data):
+        payload = {'data': data}
+        headers = {'Content-Type': 'application/json'}
+        response = requests.post(self.encrypt_url, data=json.dumps(payload), headers=headers)
+        if response.status_code == 200:
+            return response.json().get('message')
+        else:
+            response.raise_for_status()
+
+    def decrypt_data(self, encrypted_data):
+        payload = {'encrypted_data': encrypted_data}
+        headers = {'Content-Type': 'application/json'}
+        response = requests.post(self.decrypt_url, data=json.dumps(payload), headers=headers)
+        if response.status_code == 200:
+            return response.json().get('message')
+        else:
+            response.raise_for_status()
+
+    def calculate_hmac(self, data):
+        payload = {'data': data}
+        headers = {'Content-Type': 'application/json'}
+        response = requests.post(self.hmac_url, data=json.dumps(payload), headers=headers)
+        if response.status_code == 200:
+            return response.json().get('message')
+        else:
+            response.raise_for_status()

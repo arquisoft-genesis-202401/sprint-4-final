@@ -1,9 +1,10 @@
 import json
 import base64
 from datetime import datetime, timezone, timedelta
+
+import requests
 from twilio.rest import Client
-from .crypto_module import CryptoModule
-from ..settings import VARS
+from .settings import VARS
 
 class Auth:
     def __init__(self):
@@ -34,8 +35,8 @@ class Auth:
     def encode_token(self, application_id):
         """ Encode the header, payload and signature into a Base64 string """
         header_json, payload_json = self.serialize_data(application_id)
-        cryptoModule = CryptoModule()
-        signature = cryptoModule.calculate_hmac((f"{header_json};{payload_json}").encode())
+        cryptoService = CryptoService()
+        signature = cryptoService.calculate_hmac((f"{header_json};{payload_json}").encode())
         token = f"{header_json};{payload_json};{signature}"
         encoded_token = base64.urlsafe_b64encode(token.encode()).decode()
         return encoded_token
@@ -53,8 +54,8 @@ class Auth:
             header_payload = f"{header_json};{payload_json}"
             
             # Verify signature
-            cryptoModule = CryptoModule()
-            expected_signature = cryptoModule.calculate_hmac(header_payload.encode())
+            cryptoService = CryptoService()
+            expected_signature = cryptoService.calculate_hmac(header_payload.encode())
             if (signature != expected_signature):
                 return False
 
@@ -107,3 +108,37 @@ class Auth:
         verify = self.client.verify.v2.services(self.service_sid)
         result = verify.verification_checks.create(to=phone_number, code=str(otp_code))
         return result.status == 'approved'
+
+class CryptoService:
+    def __init__(self):
+        self.crypto_manager_ip = VARS["PRIVATE_IP_CRYPTO_MANAGER"]
+        self.encrypt_url = f"http://{self.crypto_manager_ip}/encrypt"
+        self.decrypt_url = f"http://{self.crypto_manager_ip}/decrypt"
+        self.hmac_url = f"http://{self.crypto_manager_ip}/hmac"
+
+    def encrypt_data(self, data):
+        payload = {'data': data}
+        headers = {'Content-Type': 'application/json'}
+        response = requests.post(self.encrypt_url, data=json.dumps(payload), headers=headers)
+        if response.status_code == 200:
+            return response.json().get('message')
+        else:
+            response.raise_for_status()
+
+    def decrypt_data(self, encrypted_data):
+        payload = {'encrypted_data': encrypted_data}
+        headers = {'Content-Type': 'application/json'}
+        response = requests.post(self.decrypt_url, data=json.dumps(payload), headers=headers)
+        if response.status_code == 200:
+            return response.json().get('message')
+        else:
+            response.raise_for_status()
+
+    def calculate_hmac(self, data):
+        payload = {'data': data}
+        headers = {'Content-Type': 'application/json'}
+        response = requests.post(self.hmac_url, data=json.dumps(payload), headers=headers)
+        if response.status_code == 200:
+            return response.json().get('message')
+        else:
+            response.raise_for_status()

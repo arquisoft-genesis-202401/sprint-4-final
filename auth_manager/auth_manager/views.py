@@ -1,4 +1,5 @@
 # auth_app/views.py
+import json
 from django.http import JsonResponse
 from django.views.decorators.http import require_http_methods
 from .auth_module import Auth

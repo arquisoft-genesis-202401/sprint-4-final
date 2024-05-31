@@ -41,3 +41,7 @@ curl -X GET "http://<PUBLIC_IP>:<PORT>/get-basic-information/1/" \
     "document_type": "ID",
     "document_number": "1234567890"
 }'
+
+
+
+curl -X POST "http://127.0.0.1/send_otp/" -H "Content-Type: application/json" -d '{"phone_number": "3195731337"}'
