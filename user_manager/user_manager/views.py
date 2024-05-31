@@ -269,7 +269,10 @@ class AuthService:
         headers = {'Content-Type': 'application/json'}
         response = requests.post(self.verify_token_url, data=json.dumps(payload), headers=headers)
         response.raise_for_status()
-        return response.json().get('is_valid')
+        result = response.json().get('is_valid').lower()
+        if result == "true":
+            True
+        return False
 
     def get_application_id(self, token):
         if isinstance(token, bytes):
@@ -298,4 +301,7 @@ class AuthService:
         headers = {'Content-Type': 'application/json'}
         response = requests.post(self.verify_otp_url, data=json.dumps(payload), headers=headers)
         response.raise_for_status()
-        return response.json().get('is_approved')
+        result = response.json().get('is_approved').lower()
+        if result == "true":
+            return True
+        return False

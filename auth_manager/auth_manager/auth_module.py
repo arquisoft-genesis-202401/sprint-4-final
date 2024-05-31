@@ -94,9 +94,7 @@ class Auth:
         :return: None
         """
         verify = self.client.verify.v2.services(self.service_sid)
-        print(phone_number)
-        print(self.service_sid)
-        result = verify.verifications.create(to=phone_number, channel='sms')
+        result = verify.verifications.create(to=str(phone_number), channel='sms')
         return result.status
 
     def verify_otp(self, phone_number, otp_code):
@@ -108,7 +106,7 @@ class Auth:
         :return: Boolean, True if the OTP is correct, False otherwise
         """
         verify = self.client.verify.v2.services(self.service_sid)
-        result = verify.verification_checks.create(to=phone_number, code=str(otp_code))
+        result = verify.verification_checks.create(to=str(phone_number), code=str(otp_code))
         return result.status == 'approved'
 
 class CryptoService:
