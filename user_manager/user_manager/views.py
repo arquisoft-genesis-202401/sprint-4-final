@@ -6,7 +6,6 @@ from .services.user_service import update_application_basic_info_service
 from .services.user_service import get_basic_information_by_application_service
 from .services.user_service import get_latest_application_service
 from .services.user_service import bind_phone_service
-from .services import A
 import traceback
 import sys
 import json
