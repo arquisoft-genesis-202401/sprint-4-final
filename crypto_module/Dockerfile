@@ -14,7 +14,8 @@ COPY . .
 
 RUN cargo build --release
 
-FROM debian:buster-slim
+# Use a Rust runtime image
+FROM rust:slim
 
 RUN apt-get update && \
     apt-get install -y openssl ca-certificates && \

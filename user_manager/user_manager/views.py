@@ -8,8 +8,6 @@ from .services.user_service import bind_phone_service
 import traceback
 import sys
 import json
-from .modules.otp_module import OTPModule
-from .modules.session_module import SessionModule
 
 @require_http_methods(['POST'])
 def send_otp_to_phone(request):
