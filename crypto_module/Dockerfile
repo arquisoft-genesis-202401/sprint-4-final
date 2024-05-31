@@ -2,7 +2,7 @@ FROM rust:latest AS builder
 
 WORKDIR /app
 
-COPY Cargo.toml Cargo.lock ./
+COPY Cargo.toml ./
 
 RUN cargo build --release
 RUN rm -rf src
