@@ -38,8 +38,8 @@ Ensure that your `user_manager` component is properly configured to fetch encryp
 ### Step 4: Download and Configure Templates
 - Download the necessary templates:
     ```bash
-    wget --no-cache https://raw.githubusercontent.com/arquisoft-genesis-202401/sprint-3-final/main/set_env_vars.sh.template
-    wget --no-cache https://raw.githubusercontent.com/arquisoft-genesis-202401/sprint-3-final/main/deployment.yaml.template
+    wget --no-cache https://raw.githubusercontent.com/arquisoft-genesis-202401/sprint-4-final/main/set_env_vars.sh.template
+    wget --no-cache https://raw.githubusercontent.com/arquisoft-genesis-202401/sprint-4-final/main/deployment.yaml.template
     ```
 
 - Update `set_env_vars.sh.template` with the real values and save it as `set_env_vars.sh`.
@@ -57,17 +57,17 @@ Ensure that your `user_manager` component is properly configured to fetch encryp
 ### Step 5: Create and Manage Deployment
 - Create the deployment using `gcloud deployment-manager`:
     ```bash
-    gcloud deployment-manager deployments create sprint-3-final-deployment --config deployment.yaml
+    gcloud deployment-manager deployments create sprint-4-final-deployment --config deployment.yaml
     ```
 
 - To delete the deployment, run:
     ```bash
-    gcloud deployment-manager deployments delete sprint-3-final-deployment
+    gcloud deployment-manager deployments delete sprint-4-final-deployment
     ```
 
 - To update the deployment configuration, use:
     ```bash
-    gcloud deployment-manager deployments update sprint-3-final-deployment --config deployment.yaml
+    gcloud deployment-manager deployments update sprint-4-final-deployment --config deployment.yaml
     ```
 
 ## Additional Steps (Optional)
