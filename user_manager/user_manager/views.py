@@ -294,9 +294,9 @@ class AuthService:
 
     def verify_otp(self, phone_number, otp_code):
         if isinstance(phone_number, bytes):
-            phone_number = phone_number.decode('utf-8')
+            phone_number = str(phone_number).strip()
         if isinstance(otp_code, bytes):
-           otp_code = otp_code.decode('utf-8')
+           otp_code = str(otp_code).strip()
         payload = {'phone_number': phone_number, 'otp_code': otp_code}
         headers = {'Content-Type': 'application/json'}
         response = requests.post(self.verify_otp_url, data=json.dumps(payload), headers=headers)
