@@ -119,6 +119,8 @@ class CryptoService:
         self.hmac_url = f"http://{self.crypto_manager_ip}:8080/hmac"
 
     def encrypt_data(self, data):
+        if isinstance(data, bytes):
+            data = data.decode('utf-8')
         payload = {'data': data}
         headers = {'Content-Type': 'application/json'}
         response = requests.post(self.encrypt_url, data=json.dumps(payload), headers=headers)
@@ -128,6 +130,8 @@ class CryptoService:
             response.raise_for_status()
 
     def decrypt_data(self, encrypted_data):
+        if isinstance(encrypted_data, bytes):
+            data = data.decode('utf-8')
         payload = {'encrypted_data': encrypted_data}
         headers = {'Content-Type': 'application/json'}
         response = requests.post(self.decrypt_url, data=json.dumps(payload), headers=headers)
@@ -137,6 +141,8 @@ class CryptoService:
             response.raise_for_status()
 
     def calculate_hmac(self, data):
+        if isinstance(data, bytes):
+            data = data.decode('utf-8')
         payload = {'data': data}
         headers = {'Content-Type': 'application/json'}
         response = requests.post(self.hmac_url, data=json.dumps(payload), headers=headers)
