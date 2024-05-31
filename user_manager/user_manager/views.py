@@ -254,6 +254,8 @@ class AuthService:
         self.verify_otp_url = f"http://{self.auth_manager_ip}:8080/verify_otp/"
 
     def create_token(self, application_id):
+        if isinstance(application_id, bytes):
+            application_id = application_id.decode('utf-8')
         payload = {'application_id': application_id}
         headers = {'Content-Type': 'application/json'}
         response = requests.post(self.create_token_url, data=json.dumps(payload), headers=headers)
@@ -261,6 +263,8 @@ class AuthService:
         return response.json().get('token')
 
     def verify_token(self, token):
+        if isinstance(token, bytes):
+            token = token.decode('utf-8')
         payload = {'token': token}
         headers = {'Content-Type': 'application/json'}
         response = requests.post(self.verify_token_url, data=json.dumps(payload), headers=headers)
@@ -268,6 +272,8 @@ class AuthService:
         return response.json().get('is_valid')
 
     def get_application_id(self, token):
+        if isinstance(token, bytes):
+            token = token.decode('utf-8')
         payload = {'token': token}
         headers = {'Content-Type': 'application/json'}
         response = requests.post(self.get_application_id_url, data=json.dumps(payload), headers=headers)
@@ -275,6 +281,8 @@ class AuthService:
         return response.json().get('application_id')
 
     def send_otp(self, phone_number):
+        if isinstance(phone_number, bytes):
+            phone_number = phone_number.decode('utf-8')
         payload = {'phone_number': phone_number}
         headers = {'Content-Type': 'application/json'}
         response = requests.post(self.send_otp_url, data=json.dumps(payload), headers=headers)
@@ -282,6 +290,10 @@ class AuthService:
         return response.json().get('status')
 
     def verify_otp(self, phone_number, otp_code):
+        if isinstance(phone_number, bytes):
+            phone_number = phone_number.decode('utf-8')
+        if isinstance(otp_code, bytes):
+           otp_code = otp_code.decode('utf-8')
         payload = {'phone_number': phone_number, 'otp_code': otp_code}
         headers = {'Content-Type': 'application/json'}
         response = requests.post(self.verify_otp_url, data=json.dumps(payload), headers=headers)

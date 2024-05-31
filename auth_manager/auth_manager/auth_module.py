@@ -131,7 +131,7 @@ class CryptoService:
 
     def decrypt_data(self, encrypted_data):
         if isinstance(encrypted_data, bytes):
-            data = data.decode('utf-8')
+            encrypted_data = encrypted_data.decode('utf-8')
         payload = {'encrypted_data': encrypted_data}
         headers = {'Content-Type': 'application/json'}
         response = requests.post(self.decrypt_url, data=json.dumps(payload), headers=headers)
