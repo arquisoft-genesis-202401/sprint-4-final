@@ -114,9 +114,9 @@ class Auth:
 class CryptoService:
     def __init__(self):
         self.crypto_manager_ip = VARS["PRIVATE_IP_CRYPTO_MANAGER"]
-        self.encrypt_url = f"http://{self.crypto_manager_ip}/encrypt"
-        self.decrypt_url = f"http://{self.crypto_manager_ip}/decrypt"
-        self.hmac_url = f"http://{self.crypto_manager_ip}/hmac"
+        self.encrypt_url = f"http://{self.crypto_manager_ip}:8080/encrypt"
+        self.decrypt_url = f"http://{self.crypto_manager_ip}:8080/decrypt"
+        self.hmac_url = f"http://{self.crypto_manager_ip}:8080/hmac"
 
     def encrypt_data(self, data):
         payload = {'data': data}

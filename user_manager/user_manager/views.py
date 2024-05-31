@@ -248,11 +248,11 @@ def get_basic_information(request, application_id):
 class AuthService:
     def __init__(self):
         self.auth_manager_ip = VARS["PRIVATE_IP_AUTH_MANAGER"]
-        self.create_token_url = f"http://{self.auth_manager_ip}/create_token/"
-        self.verify_token_url = f"http://{self.auth_manager_ip}/verify_token/"
-        self.get_application_id_url = f"http://{self.auth_manager_ip}/get_application_id/"
-        self.send_otp_url = f"http://{self.auth_manager_ip}/send_otp/"
-        self.verify_otp_url = f"http://{self.auth_manager_ip}/verify_otp/"
+        self.create_token_url = f"http://{self.auth_manager_ip}:8080/create_token/"
+        self.verify_token_url = f"http://{self.auth_manager_ip}:8080/verify_token/"
+        self.get_application_id_url = f"http://{self.auth_manager_ip}:8080/get_application_id/"
+        self.send_otp_url = f"http://{self.auth_manager_ip}:8080/send_otp/"
+        self.verify_otp_url = f"http://{self.auth_manager_ip}:8080/verify_otp/"
 
     def create_token(self, application_id):
         payload = {'application_id': application_id}
