@@ -1,13 +1,16 @@
 from django.http import JsonResponse, HttpResponseBadRequest
 from django.views.decorators.http import require_http_methods
+import requests
 from .services.user_service import create_customer_application_service
 from .services.user_service import update_application_basic_info_service
 from .services.user_service import get_basic_information_by_application_service
 from .services.user_service import get_latest_application_service
 from .services.user_service import bind_phone_service
+from .services import A
 import traceback
 import sys
 import json
+from .settings import VARS
 
 @require_http_methods(['POST'])
 def send_otp_to_phone(request):
@@ -25,8 +28,8 @@ def send_otp_to_phone(request):
         phone_number = data['phone_number']
         
         # Call the service function to send an OTP
-        otp_module = OTPModule()
-        status = otp_module.send_otp(phone_number)
+        auth_service = AuthService()
+        status = auth_service.send_otp(phone_number)
         
         if status == "pending":
             return JsonResponse({'message': 'OTP sent successfully.', 'phone_number': phone_number})
@@ -58,8 +61,8 @@ def create_customer_application(request):
         phone_number = data['phone_number']
 
         # Verify OTP
-        otp_module = OTPModule()
-        if not otp_module.verify_otp(phone_number, otp):
+        auth_service = AuthService()
+        if not auth_service.verify_otp(phone_number, otp):
             return HttpResponseBadRequest("Invalid OTP")
 
         # Call the service function to create customer application
@@ -75,8 +78,8 @@ def create_customer_application(request):
             return HttpResponseBadRequest(result)
 
         # Generate token
-        session_module = SessionModule()
-        token = session_module.create_token(application_id)
+        auth_service = AuthService()
+        token = auth_service.create_token(application_id)
 
         # Return the application ID and token
         return JsonResponse({
@@ -111,8 +114,8 @@ def get_customer_latest_application(request):
         phone_number = data['phone_number']
 
         # Verify OTP
-        otp_module = OTPModule()
-        if not otp_module.verify_otp(phone_number, otp):
+        auth_service = AuthService()
+        if not auth_service.verify_otp(phone_number, otp):
             return HttpResponseBadRequest("Invalid OTP")
 
         # Call the service function to get the latest application
@@ -122,8 +125,8 @@ def get_customer_latest_application(request):
         application_id = result["application_id"]
 
         # Generate token
-        session_module = SessionModule()
-        token = session_module.create_token(application_id)
+        auth_service = AuthService()
+        token = auth_service.create_token(application_id)
 
         # Return the application ID and token
         return JsonResponse({
@@ -146,13 +149,13 @@ def update_application_basic_info(request, application_id):
         if not token:
             return HttpResponseBadRequest("Authorization token is missing.")
 
-        # Initialize SessionModule and verify the token
-        session_module = SessionModule()
-        if not session_module.verify_token(token):
+        # Initialize AuthService and verify the token
+        auth_service = AuthService()
+        if not auth_service.verify_token(token):
             return HttpResponseBadRequest("Invalid or expired token.")
 
         # Extract the application ID from the token
-        token_application_id = session_module.get_application_id(token)
+        token_application_id = auth_service.get_application_id(token)
         if token_application_id != application_id:
             return HttpResponseBadRequest("Token application ID does not match the requested application ID.")
 
@@ -202,13 +205,13 @@ def get_basic_information(request, application_id):
         if not token:
             return HttpResponseBadRequest("Authorization token is missing.")
 
-        # Initialize SessionModule and verify the token
-        session_module = SessionModule()
-        if not session_module.verify_token(token):
+        # Initialize AuthService and verify the token
+        auth_service = AuthService()
+        if not auth_service.verify_token(token):
             return HttpResponseBadRequest("Invalid or expired token.")
 
         # Extract the application ID from the token
-        token_application_id = session_module.get_application_id(token)
+        token_application_id = auth_service.get_application_id(token)
         if token_application_id != application_id:
             return HttpResponseBadRequest("Token application ID does not match the requested application ID.")
 
@@ -239,3 +242,49 @@ def get_basic_information(request, application_id):
     except Exception as e:
         traceback.print_exc(file=sys.stdout)
         return HttpResponseBadRequest(f"An error occurred: {str(e)}")
+    
+
+
+class AuthService:
+    def __init__(self):
+        self.auth_manager_ip = VARS["PRIVATE_IP_AUTH_MANAGER"]
+        self.create_token_url = f"http://{self.auth_manager_ip}/create_token/"
+        self.verify_token_url = f"http://{self.auth_manager_ip}/verify_token/"
+        self.get_application_id_url = f"http://{self.auth_manager_ip}/get_application_id/"
+        self.send_otp_url = f"http://{self.auth_manager_ip}/send_otp/"
+        self.verify_otp_url = f"http://{self.auth_manager_ip}/verify_otp/"
+
+    def create_token(self, application_id):
+        payload = {'application_id': application_id}
+        headers = {'Content-Type': 'application/json'}
+        response = requests.post(self.create_token_url, data=json.dumps(payload), headers=headers)
+        response.raise_for_status()
+        return response.json().get('token')
+
+    def verify_token(self, token):
+        payload = {'token': token}
+        headers = {'Content-Type': 'application/json'}
+        response = requests.post(self.verify_token_url, data=json.dumps(payload), headers=headers)
+        response.raise_for_status()
+        return response.json().get('is_valid')
+
+    def get_application_id(self, token):
+        payload = {'token': token}
+        headers = {'Content-Type': 'application/json'}
+        response = requests.post(self.get_application_id_url, data=json.dumps(payload), headers=headers)
+        response.raise_for_status()
+        return response.json().get('application_id')
+
+    def send_otp(self, phone_number):
+        payload = {'phone_number': phone_number}
+        headers = {'Content-Type': 'application/json'}
+        response = requests.post(self.send_otp_url, data=json.dumps(payload), headers=headers)
+        response.raise_for_status()
+        return response.json().get('status')
+
+    def verify_otp(self, phone_number, otp_code):
+        payload = {'phone_number': phone_number, 'otp_code': otp_code}
+        headers = {'Content-Type': 'application/json'}
+        response = requests.post(self.verify_otp_url, data=json.dumps(payload), headers=headers)
+        response.raise_for_status()
+        return response.json().get('is_approved')

@@ -94,6 +94,8 @@ class Auth:
         :return: None
         """
         verify = self.client.verify.v2.services(self.service_sid)
+        print(phone_number)
+        print(self.service_sid)
         result = verify.verifications.create(to=phone_number, channel='sms')
         return result.status
 
