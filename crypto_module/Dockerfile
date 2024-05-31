@@ -3,7 +3,10 @@ FROM rust:latest AS builder
 WORKDIR /app
 
 COPY Cargo.toml ./
+COPY Cargo.lock ./
 
+RUN mkdir src
+RUN echo "fn main() { println!(\"Hello, world!\"); }" > src/main.rs
 RUN cargo build --release
 RUN rm -rf src
 
