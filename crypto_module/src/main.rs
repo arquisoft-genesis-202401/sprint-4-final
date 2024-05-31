@@ -115,6 +115,7 @@ fn get_crypto_module() -> Result<CryptoModule, Box<dyn std::error::Error>> {
 
 #[actix_web::main]
 async fn main() -> std::io::Result<()> {
+    println!("Running...");
     HttpServer::new(|| {
         App::new()
             .route("/encrypt", web::post().to(encrypt_endpoint))

@@ -1,5 +1,5 @@
 resources:
-# Firewall rules
+# Previous Firewall rules
 - name: user-manager-firewall
   type: compute.v1.firewall
   properties:
@@ -45,7 +45,38 @@ resources:
       ports: 
       - 8080
 
-# VM instances
+# New Firewall rules
+- name: user-manager-to-auth-firewall
+  type: compute.v1.firewall
+  properties:
+    network: https://www.googleapis.com/compute/v1/projects/${PROJECT_ID}/global/networks/default
+    priority: 1000
+    direction: INGRESS
+    sourceTags: 
+    - user-manager
+    targetTags:
+    - auth-manager
+    allowed:
+    - IPProtocol: TCP
+      ports: 
+      - 8080
+
+- name: auth-to-crypto-firewall
+  type: compute.v1.firewall
+  properties:
+    network: https://www.googleapis.com/compute/v1/projects/${PROJECT_ID}/global/networks/default
+    priority: 1000
+    direction: INGRESS
+    sourceTags:
+    - auth-manager
+    targetTags:
+    - crypto-manager
+    allowed:
+    - IPProtocol: TCP
+      ports: 
+      - 8080
+
+# Previous VM instances
 - name: crypto-manager-ms
   type: compute.v1.instance
   properties:
@@ -138,3 +169,32 @@ resources:
           sudo sed -i 's/local   all             all                                     peer/local   all             all                                     md5/' /etc/postgresql/12/main/pg_hba.conf
           sudo service postgresql restart
           echo "Done"
+
+# New VM instance
+- name: auth-manager-ms
+  type: compute.v1.instance
+  properties:
+    zone: us-central1-a
+    machineType: https://www.googleapis.com/compute/v1/projects/${PROJECT_ID}/zones/us-central1-a/machineTypes/e2-micro
+    disks:
+    - deviceName: boot
+      type: PERSISTENT
+      boot: true
+      autoDelete: true
+      initializeParams:
+        sourceImage: https://www.googleapis.com/compute/v1/projects/cos-cloud/global/images/cos-101-17162-463-8
+    networkInterfaces:
+    - network: https://www.googleapis.com/compute/v1/projects/${PROJECT_ID}/global/networks/default
+      networkIP: ${PRIVATE_IP_AUTH_MANAGER}
+      accessConfigs:
+      - name: External NAT
+        type: ONE_TO_ONE_NAT
+    tags:
+      items: 
+      - auth-manager
+    metadata:
+      items:
+      - key: startup-script
+        value: |
+          #!/bin/bash
+          # Initialization script for auth-manager microservice

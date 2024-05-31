@@ -83,8 +83,8 @@ DATABASES = {
         'NAME': os.getenv('POSTGRESQL_DB_NAME'),
         'USER': os.getenv('POSTGRESQL_DB_USER'),
         'PASSWORD': os.getenv('POSTGRESQL_DB_PASSWORD'),
-        'HOST': os.getenv('PRIVATE_IP_BUSINESS_DATABASE'),
-        'PORT': os.getenv('PORT_BUSINESS_DATABASE'),
+        'HOST': os.getenv('PRIVATE_IP_USER_DATABASE'),
+        'PORT': os.getenv('PORT_USER_DATABASE'),
     }
 }
 
@@ -131,10 +131,6 @@ STATIC_URL = 'static/'
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
 # Env Vars
-VARS = { "AES_KEY": os.getenv("AES_KEY"),
-        "HMAC_KEY": os.getenv("HMAC_KEY"),
-        "IV": os.getenv("IV"),
-        "ACCOUNT_SID": os.getenv("ACCOUNT_SID"),
-        "AUTH_TOKEN": os.getenv("AUTH_TOKEN"),
-        "SERVICE_SID": os.getenv("SERVICE_SID")
+VARS = { "PRIVATE_IP_CRYPTO_MANAGER": os.getenv("PRIVATE_IP_CRYPTO_MANAGER"),
+        "PRIVATE_IP_AUTH_MANAGER": os.getenv("PRIVATE_IP_AUTH_MANAGER")
     }
