@@ -9,6 +9,9 @@ export POSTGRESQL_DB_PASSWORD="${POSTGRESQL_DB_PASSWORD}"
 export PRIVATE_IP_CRYPTO_MANAGER="${PRIVATE_IP_CRYPTO_MANAGER}"
 export PRIVATE_IP_AUTH_MANAGER="${PRIVATE_IP_AUTH_MANAGER}"
 
+docker pull redis
+docker run -d --name my-redis -p 6379:6379 redis
+
 # Clone the repository
 git clone https://github.com/arquisoft-genesis-202401/sprint-4-final.git
 cd sprint-4-final/user_manager/

@@ -60,9 +60,9 @@ def create_customer_application(request):
         phone_number = data['phone_number']
 
         # Verify OTP
-        auth_service = AuthService()
-        if not auth_service.verify_otp(phone_number, otp):
-            return HttpResponseBadRequest("Invalid OTP")
+        #auth_service = AuthService()
+        #if not auth_service.verify_otp(phone_number, otp):
+            #return HttpResponseBadRequest("Invalid OTP")
 
         # Call the service function to create customer application
         application_id = create_customer_application_service(
