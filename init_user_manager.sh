@@ -17,7 +17,7 @@ cd sprint-4-final/user_manager/
 sudo docker build -t user_manager .
 
 # Run the Docker container
-sudo docker run -d -p 8000:8000 --name user_manager \
+sudo docker run -d -p 8080:8080 --name user_manager \
   -e PRIVATE_IP_USER_DATABASE=$PRIVATE_IP_USER_DATABASE \
   -e PORT_USER_DATABASE=$PORT_USER_DATABASE \
   -e POSTGRESQL_DB_NAME=$POSTGRESQL_DB_NAME \
