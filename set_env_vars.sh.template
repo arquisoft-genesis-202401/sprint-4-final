@@ -1,0 +1,33 @@
+#!/bin/bash
+
+# Creating and writing to env_vars.sh
+export PROJECT_ID="<PROJECT_ID>"
+
+# User manager env vars
+export PRIVATE_IP_USER_MANAGER="<PRIVATE_IP_USER_MANAGER>"
+
+# Auth manager env vars
+export ACCOUNT_SID="<ACCOUNT_SID>"
+export AUTH_TOKEN="<AUTH_TOKEN>"
+export SERVICE_SID="<SERVICE_SID>"
+
+# Crypto manager env vars
+export PRIVATE_IP_CRYPTO_MANAGER="<PRIVATE_IP_CRYPTO_MANAGER>"
+export AES_KEY="<AES_KEY>"
+export HMAC_KEY="<HMAC_KEY>"
+export IV="<IV>"
+
+
+# User Database env vars
+export PRIVATE_IP_USER_DATABASE="<PRIVATE_IP_USER_DATABASE>"
+export PORT_USER_DATABASE="<PORT_USER_DATABASE>"
+export INTERFACE_USER_DATABASE="<INTERFACE_USER_DATABASE>"
+export LISTEN_ADDR_USER_DATABASE="<LISTEN_ADDR_USER_DATABASE>"
+export MAX_CONN_USER_DATABASE="<MAX_CONN_USER_DATABASE>"
+export POSTGRESQL_DB_NAME="<POSTGRESQL_DB_NAME>"
+export POSTGRESQL_DB_USER="<POSTGRESQL_DB_USER>"
+export POSTGRESQL_DB_PASSWORD="<POSTGRESQL_DB_PASSWORD>"
+
+# Substitute environment variables in deployment.yaml.template and output to deployment.yml
+envsubst < deployment.yaml.template > deployment.yaml
+psql -U badmin_user -d USER_db --password

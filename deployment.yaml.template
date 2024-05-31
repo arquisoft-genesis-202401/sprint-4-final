@@ -1,0 +1,140 @@
+resources:
+# Firewall rules
+- name: user-manager-firewall
+  type: compute.v1.firewall
+  properties:
+    network: https://www.googleapis.com/compute/v1/projects/${PROJECT_ID}/global/networks/default
+    priority: 1000
+    direction: INGRESS
+    sourceRanges: 
+    - 0.0.0.0/0
+    targetTags:
+    - user-manager
+    allowed:
+    - IPProtocol: TCP
+      ports: 
+      - 8080
+
+- name: user-to-db-firewall
+  type: compute.v1.firewall
+  properties:
+    network: https://www.googleapis.com/compute/v1/projects/${PROJECT_ID}/global/networks/default
+    priority: 1000
+    direction: INGRESS
+    sourceTags: 
+    - user-manager
+    targetTags:
+    - user-database
+    allowed:
+    - IPProtocol: TCP
+      ports: 
+      - 5432
+
+- name: user-to-crypto-firewall
+  type: compute.v1.firewall
+  properties:
+    network: https://www.googleapis.com/compute/v1/projects/${PROJECT_ID}/global/networks/default
+    priority: 1000
+    direction: INGRESS
+    sourceTags: 
+    - user-manager
+    targetTags:
+    - crypto-manager
+    allowed:
+    - IPProtocol: TCP
+      ports: 
+      - 8080
+
+# VM instances
+- name: crypto-manager-ms
+  type: compute.v1.instance
+  properties:
+    zone: us-central1-a
+    machineType: https://www.googleapis.com/compute/v1/projects/${PROJECT_ID}/zones/us-central1-a/machineTypes/e2-micro
+    disks:
+    - deviceName: boot
+      type: PERSISTENT
+      boot: true
+      autoDelete: true
+      initializeParams:
+        sourceImage: 
+    networkInterfaces:
+    - network: https://www.googleapis.com/compute/v1/projects/${PROJECT_ID}/global/networks/default
+      networkIP: ${PRIVATE_IP_CRYPTO_MANAGER}
+      accessConfigs:
+      - name: External NAT
+        type: ONE_TO_ONE_NAT
+    tags:
+      items: 
+      - crypto-manager
+    metadata:
+      items:
+      - key: startup-script
+        value: |
+          #!/bin/bash
+          # Initialization script for crypto-manager microservice
+
+- name: user-manager-ms
+  type: compute.v1.instance
+  properties:
+    zone: us-central1-a
+    machineType: https://www.googleapis.com/compute/v1/projects/${PROJECT_ID}/zones/us-central1-a/machineTypes/e2-micro
+    disks:
+    - deviceName: boot
+      type: PERSISTENT
+      boot: true
+      autoDelete: true
+      initializeParams:
+        sourceImage: https://www.googleapis.com/compute/v1/projects/cos-cloud/global/images/cos-101-17162-463-8
+    networkInterfaces:
+    - network: https://www.googleapis.com/compute/v1/projects/${PROJECT_ID}/global/networks/default
+      networkIP: ${PRIVATE_IP_USER_MANAGER}
+      accessConfigs:
+      - name: External NAT
+        type: ONE_TO_ONE_NAT
+    tags:
+      items: 
+      - user-manager
+    metadata:
+      items:
+      - key: startup-script
+        value: |
+          #!/bin/bash
+          # Initialization script for user-manager microservice
+
+- name: user-database
+  type: compute.v1.instance
+  properties:
+    zone: us-central1-a
+    machineType: https://www.googleapis.com/compute/v1/projects/${PROJECT_ID}/zones/us-central1-a/machineTypes/e2-micro
+    disks:
+    - deviceName: boot
+      type: PERSISTENT
+      boot: true
+      autoDelete: true
+      initializeParams:
+        sourceImage: https://www.googleapis.com/compute/v1/projects/cos-cloud/global/images/cos-101-17162-463-8
+    networkInterfaces:
+    - network: https://www.googleapis.com/compute/v1/projects/${PROJECT_ID}/global/networks/default
+      networkIP: ${PRIVATE_IP_USER_DATABASE}
+      accessConfigs:
+      - name: External NAT
+        type: ONE_TO_ONE_NAT
+    tags:
+      items: 
+      - user-database
+    metadata:
+      items:
+      - key: startup-script
+        value: |
+          #!/bin/bash
+          sudo apt-get update
+          sudo apt-get install -y postgresql postgresql-contrib
+          sudo -u postgres psql -c "CREATE USER ${POSTGRESQL_DB_USER} WITH PASSWORD '${POSTGRESQL_DB_PASSWORD}';"
+          sudo -u postgres createdb -O ${POSTGRESQL_DB_USER} ${POSTGRESQL_DB_NAME}
+          echo "host all all ${INTERFACE_USER_DATABASE} trust" | sudo tee -a /etc/postgresql/12/main/pg_hba.conf
+          echo "listen_addresses='${LISTEN_ADDR_USER_DATABASE}'" | sudo tee -a /etc/postgresql/12/main/postgresql.conf
+          echo "max_connections=${MAX_CONN_USER_DATABASE}" | sudo tee -a /etc/postgresql/12/main/postgresql.conf
+          sudo sed -i 's/local   all             all                                     peer/local   all             all                                     md5/' /etc/postgresql/12/main/pg_hba.conf
+          sudo service postgresql restart
+          echo "Done"
